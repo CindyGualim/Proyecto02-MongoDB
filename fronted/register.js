@@ -24,7 +24,10 @@ function Register() {
       const data = await res.json();
 
       if (res.ok) {
-        setMensaje('Registro exitoso. Ahora puedes iniciar sesión.');
+        setMensaje(' Registro exitoso. Redirigiendo...');
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
       } else {
         setMensaje(data.message || 'Error al registrarse');
       }
