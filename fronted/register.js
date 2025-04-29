@@ -1,45 +1,48 @@
 const { useState } = React;
 
-function Login() {
+function Register() {
+  const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
   const [mensaje, setMensaje] = useState('');
 
-  const handleLogin = async (e) => {
+  const handleRegistro = async (e) => {
     e.preventDefault();
 
-    if (!correo || !password) {
+    if (!nombre || !correo || !password) {
       setMensaje('Completa todos los campos');
       return;
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
+      const res = await fetch('http://localhost:5000/api/usuarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo, password })
+        body: JSON.stringify({ nombre, correo, password })
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setMensaje(`¡Bienvenida, ${data.usuario.nombre}!`);
+        setMensaje('Registro exitoso. Ahora puedes iniciar sesión.');
       } else {
-        setMensaje(data.message);
+        setMensaje(data.message || 'Error al registrarse');
       }
     } catch (err) {
-      setMensaje('Error al conectar con el servidor');
+      setMensaje('Error de conexión con el servidor');
     }
-  };
-
-  const irARegistro = () => {
-    window.location.href = 'register.html';
   };
 
   return (
     <div className="login-container">
-      <h2>Iniciar Sesión</h2>
-      <form onSubmit={handleLogin}>
+      <h2>Registro</h2>
+      <form onSubmit={handleRegistro}>
+        <input
+          type="text"
+          placeholder="Nombre completo"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+        />
         <input
           type="email"
           placeholder="Correo"
@@ -52,13 +55,11 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Entrar</button>
+        <button type="submit">Registrarse</button>
         {mensaje && <p className="mensaje">{mensaje}</p>}
       </form>
-      <hr />
-      <button className="secundario" onClick={irARegistro}>Registrarse</button>
     </div>
   );
 }
 
-ReactDOM.render(<Login />, document.getElementById('root'));
+ReactDOM.render(<Register />, document.getElementById('root'));
