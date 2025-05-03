@@ -41,6 +41,23 @@ const articuloSchema = new mongoose.Schema({
 });
 const Articulo = mongoose.model('Articulo', articuloSchema);
 
+const ordenSchema = new mongoose.Schema({
+  usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', required: true },
+  restauranteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurante', required: true },
+  fecha: { type: Date, default: Date.now },
+  estado: { type: String, default: 'en preparación' },
+  platillos: [
+    {
+      articuloId: { type: mongoose.Schema.Types.ObjectId, ref: 'Articulo' },
+      nombre: String,
+      cantidad: Number,
+      precio_unitario: Number
+    }
+  ],
+  total: Number
+});
+const Orden = mongoose.model('Orden', ordenSchema);
+
 // MIDDLEWARE DE AUTENTICACION
 const authMiddleware = (req, res, next) => {
   const token = req.headers['authorization'];
@@ -59,6 +76,7 @@ const usuarioController = {
   register: async (req, res) => {
     try {
       const { nombre, correo, password } = req.body;
+      if (!correo || !password || !nombre) return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
       const existe = await Usuario.findOne({ correo });
       if (existe) return res.status(400).json({ mensaje: 'Correo ya registrado' });
       const hash = await bcrypt.hash(password, 10);
@@ -77,7 +95,7 @@ const usuarioController = {
       const coincide = await bcrypt.compare(password, usuario.password);
       if (!coincide) return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
       const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-      res.json({ token });
+      res.json({ token, usuario: { nombre: usuario.nombre, correo: usuario.correo } });
     } catch (error) {
       res.status(500).json({ mensaje: 'Error al iniciar sesión', error });
     }
@@ -143,6 +161,97 @@ const articuloController = {
     } catch (error) {
       res.status(500).json({ mensaje: 'Error al listar articulos', error });
     }
+  },
+  obtenerArticulo: async (req, res) => {
+    try {
+      const articulo = await Articulo.findById(req.params.id);
+      if (!articulo) return res.status(404).json({ mensaje: 'Artículo no encontrado' });
+      res.json(articulo);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener artículo', error });
+    }
+  }
+};
+
+// CARRITO TEMPORAL EN MEMORIA
+const carritos = {};
+const carritoController = {
+  agregarAlCarrito: (req, res) => {
+    const { articuloId, cantidad } = req.body;
+    const userId = req.usuarioId;
+    if (!carritos[userId]) carritos[userId] = [];
+    carritos[userId].push({ articuloId, cantidad });
+    res.json({ mensaje: 'Artículo agregado al carrito', carrito: carritos[userId] });
+  },
+  verCarrito: (req, res) => {
+    const userId = req.usuarioId;
+    res.json(carritos[userId] || []);
+  }
+};
+
+// CONTROLADORES ORDENES
+const ordenController = {
+  listarOrdenesUsuario: async (req, res) => {
+    try {
+      const ordenes = await Orden.find({ usuarioId: req.usuarioId });
+      res.json(ordenes);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener pedidos', error });
+    }
+  },
+  verOrdenPorId: async (req, res) => {
+    try {
+      const orden = await Orden.findOne({ _id: req.params.id, usuarioId: req.usuarioId });
+      if (!orden) return res.status(404).json({ mensaje: 'Pedido no encontrado' });
+      res.json(orden);
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al obtener pedido', error });
+    }
+  },
+  crearOrden: async (req, res) => {
+    try {
+      const { restauranteId, platillos } = req.body;
+      if (!restauranteId || !Array.isArray(platillos) || platillos.length === 0) {
+        return res.status(400).json({ mensaje: 'Datos de orden incompletos' });
+      }
+      let total = 0;
+      const detalles = [];
+      for (const item of platillos) {
+        const articulo = await Articulo.findById(item.articuloId);
+        if (!articulo) return res.status(404).json({ mensaje: `Artículo no encontrado: ${item.articuloId}` });
+        detalles.push({
+          articuloId: articulo._id,
+          nombre: articulo.nombre,
+          cantidad: item.cantidad,
+          precio_unitario: articulo.precio
+        });
+        total += articulo.precio * item.cantidad;
+      }
+      const nuevaOrden = new Orden({
+        usuarioId: req.usuarioId,
+        restauranteId,
+        platillos: detalles,
+        total
+      });
+      await nuevaOrden.save();
+      res.status(201).json({ mensaje: 'Orden creada', orden: nuevaOrden });
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al crear orden', error });
+    }
+  },
+  cancelarOrden: async (req, res) => {
+    try {
+      const orden = await Orden.findOne({ _id: req.params.id, usuarioId: req.usuarioId });
+      if (!orden) return res.status(404).json({ mensaje: 'Orden no encontrada' });
+      if (orden.estado === 'entregado') {
+        return res.status(400).json({ mensaje: 'No se puede cancelar una orden entregada' });
+      }
+      orden.estado = 'cancelado';
+      await orden.save();
+      res.json({ mensaje: 'Orden cancelada' });
+    } catch (error) {
+      res.status(500).json({ mensaje: 'Error al cancelar orden', error });
+    }
   }
 };
 
@@ -156,11 +265,20 @@ app.get('/api/restaurantes/buscar/:nombre', restauranteController.buscarRestaura
 app.get('/api/restaurantes/cercanos', restauranteController.restaurantesCercanos);
 
 app.get('/api/articulos/restaurante/:id', articuloController.listarArticulosDeRestaurante);
+app.get('/api/articulos/:id', articuloController.obtenerArticulo);
+
+app.get('/api/ordenes', authMiddleware, ordenController.listarOrdenesUsuario);
+app.get('/api/ordenes/:id', authMiddleware, ordenController.verOrdenPorId);
+app.post('/api/ordenes', authMiddleware, ordenController.crearOrden);
+app.put('/api/ordenes/:id/cancelar', authMiddleware, ordenController.cancelarOrden);
+
+app.post('/api/carrito', authMiddleware, carritoController.agregarAlCarrito);
+app.get('/api/carrito', authMiddleware, carritoController.verCarrito);
 
 // CONEXIÓN A MONGODB Y SERVIDOR
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Conectado a MongoDB');
-    app.listen(process.env.PORT || 3000, () => console.log('🚀 Servidor corriendo en puerto 3000'));
+    app.listen(process.env.PORT || 3000, () => console.log('Servidor corriendo en puerto 3000'));
   })
   .catch(err => console.error('Error al conectar a MongoDB:', err));
