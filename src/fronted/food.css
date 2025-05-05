@@ -1,0 +1,92 @@
+/* style.css */
+:root {
+    --eggplant: #5E4B56;
+    --rose-quartz: #A690A4;
+    --sage: #B1B695;
+    --light-orange: #FCD0A1;
+    --white: #fff;
+  }
+  
+body, html {
+    margin: 0;
+    background-color: var(--light-orange);
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  .home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .navbar {
+    background-color: var(--eggplant);
+    padding: 1em;
+  }
+  
+  .navbar ul {
+    list-style: none;
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .navbar a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .contenido-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2em;
+    text-align: center;
+  }
+  
+  .contenido-principal > div {
+    margin-top: 2em;
+  }
+  
+  .contenido-principal input,
+  .contenido-principal textarea {
+    display: block;
+    margin: 0.5em auto;
+    width: 300px;
+    padding: 0.5em;
+  }
+  
+  .contenido-principal button {
+    padding: 0.5em 1em;
+    margin-top: 0.5em;
+    cursor: pointer;
+  }
+  
+  .container.marketing {
+    margin-top: 3em;
+  }
+  
+  .img-circle {
+    border-radius: 50%;
+  }
+  
+  button {
+    background-color: var(--eggplant);
+    color: var(--white);
+    padding: 0.6rem;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: var(--rose-quartz);
+  }

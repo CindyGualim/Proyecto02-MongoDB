@@ -59,4 +59,59 @@
     color: var(--eggplant);
     font-weight: bold;
   }
+  .navbar {
+    background-color: var(--eggplant);
+    padding: 1rem;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  .navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar li a {
+    color: var(--white);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  
+  .navbar li a:hover {
+    color: var(--light-orange);
+  }
+  
+  .home-container {
+    padding-top: 80px; /* para dejar espacio al navbar */
+    text-align: center;
+  }
+  
+  .contenido-principal {
+    padding: 2rem;
+  }
+  .container.marketing .row {
+    display: flex;
+    justify-content: space-between; /* Espacio entre los elementos */
+  }
+  
+  .container.marketing .col-lg-2 {
+    flex: 1;
+    margin-right: 20px; /* Ajusta el margen entre los elementos si es necesario */
+  }
+  
+  .container.marketing .col-lg-2:last-child {
+    margin-right: 0; /* Elimina el margen en el último elemento */
+  }
+  
+  .img-circle {
+    border-radius: 50%;
+  }
+  
   
