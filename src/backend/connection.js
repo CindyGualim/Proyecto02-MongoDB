@@ -276,7 +276,9 @@ app.post('/api/carrito', authMiddleware, carritoController.agregarAlCarrito);
 app.get('/api/carrito', authMiddleware, carritoController.verCarrito);
 
 // CONEXIÓN A MONGODB Y SERVIDOR
-mongoose.connect(process.env.MONGO_URI)
+console.log('Conectando a:', process.env.MONGODB_URI); // Debug temporal
+
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Conectado a MongoDB');
     app.listen(process.env.PORT || 3000, () => console.log('Servidor corriendo en puerto 3000'));

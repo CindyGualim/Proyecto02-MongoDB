@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Home</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="./CSS/style.css" />
 
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
@@ -31,7 +31,7 @@
       const [restaurantes, setRestaurantes] = useState([]);
 
       useEffect(() => {
-        fetch("http://localhost:5000/api/restaurantes")
+        fetch("http://localhost:5000/api/restaurantes")  // Asegúrate que esta ruta esté activa
           .then(res => res.json())
           .then(data => setRestaurantes(data))
           .catch(err => console.error("Error cargando restaurantes:", err));
@@ -43,22 +43,19 @@
           <main className="contenido-principal">
             <h2>Bienvenido a FoodApp</h2>
             <p>Explora los mejores lugares para comer y descubre nuevas opciones.</p>
-            <img src="Recursos/img01.jpg" width="50%" alt="Comida variada" />
+            <img src="Recursos/img01.jpg" width="100%" height="300" alt="Comida variada" />
 
             <div className="container marketing">
               <h3>Listado de Restaurantes</h3>
               <div className="row">
-                {restaurantes.map((r) => (
-                  <div key={r._id} className="rest-card">
-                    <h3>{r.nombre}</h3>
-                    <p><strong>Teléfono:</strong> {r.telefono || '—'}</p>
+                {restaurantes.map((r, i) => (
+                  <div className="col-lg-2" key={i}>
+                    <h2>{r.nombre}</h2>
+                    <p><strong>Teléfono:</strong> {r.telefono}</p>
                     <p>
-                      {r.direccion?.calle || ''}<br />
-                      {r.direccion?.municipio || ''}<br />
-                      Zona {r.direccion?.zona || ''} – {r.direccion?.departamento || ''}
+                      {r.direccion.calle}, zona {r.direccion.zona}, {r.direccion.municipio}
                     </p>
-                    <a href={`detalle.html?id=${r._id}`} className="btn-ver">Ver más</a>
-
+                    <p><a className="btn btn-default" href="#">Ver más</a></p>
                   </div>
                 ))}
               </div>
