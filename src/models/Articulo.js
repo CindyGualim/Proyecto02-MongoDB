@@ -1,22 +1,10 @@
 const mongoose = require('mongoose');
 
-const articuloSchema = new mongoose.Schema({
-  restauranteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Restaurante',
-    required: true
-  },
-  nombre: {
-    type: String,
-    required: true
-  },
-  descripcion: {
-    type: String
-  },
-  precio: {
-    type: Number,
-    required: true
-  }
-}, { collection: 'articulos_menu' }); // 👈 esto es importante
+const ArticuloSchema = new mongoose.Schema({
+  restauranteId: String,
+  nombre: String,
+  descripcion: String,
+  precio: Number,
+});
 
-module.exports = mongoose.model('Articulo', articuloSchema);
+module.exports = mongoose.model('Articulo', ArticuloSchema);

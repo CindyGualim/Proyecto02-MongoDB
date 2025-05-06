@@ -22,7 +22,13 @@ function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        setMensaje(`¡Bienvenida, ${data.usuario.nombre}!`);
+        setMensaje(`Bienvenido ${data.usuario.nombre}`);
+        // Redirección basada en correo y contraseña
+        if (correo === "admin@mail.com" ) {
+          window.location.href = 'homeadmin.html';
+        } else {
+          window.location.href = 'home.html';
+        }
       } else {
         setMensaje(data.message);
       }
@@ -39,8 +45,18 @@ function Login() {
     <div className="login-container">
       <h2>Iniciar Sesión</h2>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Correo" value={correo} onChange={(e) => setCorreo(e.target.value)} />
-        <input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input
+          type="email"
+          placeholder="Correo"
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
         <button type="submit">Entrar</button>
         {mensaje && <p className="mensaje">{mensaje}</p>}
       </form>
