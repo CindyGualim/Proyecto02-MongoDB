@@ -31,7 +31,7 @@
       const [restaurantes, setRestaurantes] = useState([]);
 
       useEffect(() => {
-        fetch("http://localhost:5000/api/restaurantes")  // Asegúrate que esta ruta esté activa
+        fetch("http://localhost:5000/api/restaurantes")
           .then(res => res.json())
           .then(data => setRestaurantes(data))
           .catch(err => console.error("Error cargando restaurantes:", err));
@@ -43,19 +43,22 @@
           <main className="contenido-principal">
             <h2>Bienvenido a FoodApp</h2>
             <p>Explora los mejores lugares para comer y descubre nuevas opciones.</p>
-            <img src="Recursos/img01.jpg" width="100%" height="300" alt="Comida variada" />
+            <img src="Recursos/img01.jpg" width="50%" alt="Comida variada" />
 
             <div className="container marketing">
               <h3>Listado de Restaurantes</h3>
               <div className="row">
-                {restaurantes.map((r, i) => (
-                  <div className="col-lg-2" key={i}>
-                    <h2>{r.nombre}</h2>
-                    <p><strong>Teléfono:</strong> {r.telefono}</p>
+                {restaurantes.map((r) => (
+                  <div key={r._id} className="rest-card">
+                    <h3>{r.nombre}</h3>
+                    <p><strong>Teléfono:</strong> {r.telefono || '—'}</p>
                     <p>
-                      {r.direccion.calle}, zona {r.direccion.zona}, {r.direccion.municipio}
+                      {r.direccion?.calle || ''}<br />
+                      {r.direccion?.municipio || ''}<br />
+                      Zona {r.direccion?.zona || ''} – {r.direccion?.departamento || ''}
                     </p>
-                    <p><a className="btn btn-default" href="#">Ver más</a></p>
+                    <a href={`detalle.html?id=${r._id}`} className="btn-ver">Ver más</a>
+
                   </div>
                 ))}
               </div>
