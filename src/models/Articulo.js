@@ -17,6 +17,6 @@ const articuloSchema = new mongoose.Schema({
     type: Number,
     required: true
   }
-});
+}, { collection: 'articulos_menu' }); // 👈 esto es importante
 
-module.exports = mongoose.model('articulo', articuloSchema);
+module.exports = mongoose.model('Articulo', articuloSchema);

@@ -22,13 +22,7 @@ function Login() {
       const data = await res.json();
 
       if (res.ok) {
-        setMensaje(`Bienvenido ${data.usuario.nombre}`);
-        // Redirección
-        if (data.usuario.correo === "admin@mail.com") {
-          window.location.href = 'homeadmin.html';
-        } else {
-          window.location.href = 'home.html';
-        }
+        setMensaje(`¡Bienvenida, ${data.usuario.nombre}!`);
       } else {
         setMensaje(data.message);
       }

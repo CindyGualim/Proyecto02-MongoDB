@@ -5,7 +5,69 @@
     --light-orange: #FCD0A1;
     --white: #fff;
   }
-  
+  /* style.css */
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* Centra horizontalmente */
+  justify-content: center; /* Centra verticalmente */
+  height: 100vh;           /* 100% de la altura de la ventana */
+  text-align: center;
+
+}
+
+.navbar {
+  width: 100%;
+  background-color: #333;
+  padding: 10px 0;
+}
+
+.navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.navbar li {
+  margin: 0 15px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.contenido-principal {
+  padding: 20px;
+  max-width: 800px;
+}
+
+.contenido-principal h2 {
+  margin-top: 20px;
+  color: #333;
+}
+
+.contenido-principal p {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+.contenido-principal img {
+  border-radius: 8px;
+  object-fit: cover;
+}
+
   body {
     margin: 0;
     font-family: sans-serif;
