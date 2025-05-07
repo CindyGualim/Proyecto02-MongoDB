@@ -255,6 +255,102 @@ const ordenController = {
   }
 };
 
+//PROYECCIONES
+app.get('/api/ordenes/resumen', authMiddleware, async (req, res) => {
+  try {
+    const resumen = await Orden.find(
+      { usuarioId: req.usuarioId },
+      { _id: 0, fecha: 1, estado: 1, total: 1 }
+    ).sort({ fecha: -1 }); // Opcional: ordenar por fecha descendente
+
+    res.json(resumen);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al obtener resumen de órdenes', error });
+  }
+});
+
+
+//SORTS
+app.get('/api/ordenes/por-total', authMiddleware, async (req, res) => {
+  try {
+    const ordenes = await Orden.find({ usuarioId: req.usuarioId })
+      .sort({ total: -1 }) // -1 para descendente
+      .select('fecha estado total'); // proyección opcional
+
+    res.json(ordenes);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al ordenar órdenes por total', error });
+  }
+});
+
+
+app.get('/api/ordenes/por-fecha', authMiddleware, async (req, res) => {
+  try {
+    const orden = req.query.orden === 'asc' ? 1 : -1; // ascendente por defecto si no es 'asc'
+    const ordenes = await Orden.find({ usuarioId: req.usuarioId })
+      .sort({ fecha: orden })
+      .select('fecha estado total');
+
+    res.json(ordenes);
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error al ordenar por fecha', error });
+  }
+});
+
+
+//PAGINACIONES
+app.get('/api/ordenes/paginado', authMiddleware, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    const ordenes = await Orden.find({ usuarioId: req.usuarioId })
+      .sort({ fecha: -1 }) // puedes cambiar por .sort({ total: -1 }) si deseas
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Orden.countDocuments({ usuarioId: req.usuarioId });
+
+    res.json({
+      paginaActual: page,
+      totalPaginas: Math.ceil(total / limit),
+      totalRegistros: total,
+      ordenes
+    });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en paginación de órdenes', error });
+  }
+});
+
+
+//AGREGACIONES 
+app.get('/api/ordenes/estadisticas', authMiddleware, async (req, res) => {
+  try {
+    const stats = await Orden.aggregate([
+      { $match: { usuarioId: mongoose.Types.ObjectId(req.usuarioId) } },
+      {
+        $group: {
+          _id: "$usuarioId",
+          totalPedidos: { $sum: 1 },
+          totalGastado: { $sum: "$total" },
+          promedioPorOrden: { $avg: "$total" }
+        }
+      }
+    ]);
+
+    res.json(stats[0] || {
+      totalPedidos: 0,
+      totalGastado: 0,
+      promedioPorOrden: 0
+    });
+  } catch (error) {
+    res.status(500).json({ mensaje: 'Error en estadísticas de órdenes', error });
+  }
+});
+
+
+
 // RUTAS
 app.post('/api/usuarios/register', usuarioController.register);
 app.post('/api/usuarios/login', usuarioController.login);
