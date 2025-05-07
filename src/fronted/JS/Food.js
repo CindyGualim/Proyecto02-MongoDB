@@ -43,10 +43,10 @@ function Food() {
         setNombre('');
         setDescripcion('');
         setPrecio('');
-        setMensaje('✅ Comida agregada correctamente en la base de datos');
+        setMensaje(' Comida agregada correctamente en la base de datos');
       } catch (err) {
         console.error(err);
-        setMensaje('❌ Error al guardar comida en la base de datos');
+        setMensaje(' Error al guardar comida en la base de datos');
       }
 
       setTimeout(() => setMensaje(''), 3000);
