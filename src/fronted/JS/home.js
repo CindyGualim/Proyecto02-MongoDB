@@ -4,8 +4,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <ul>
-        <li><a href="#">Menú</a></li>
-        <li><a href="#">Listado de Restaurantes</a></li>
+        <li><a href="restaurant.html">Listado de Restaurantes</a></li>
         <li><a href="#">Mejores Rankeados</a></li>
       </ul>
     </nav>
@@ -47,7 +46,7 @@ function Home() {
               }}
             >
               <img
-                src="https://via.placeholder.com/250x140?text=Comida"
+                src="Recursos/img02.jpg"
                 alt={food.nombre}
                 style={{ width: '100%', height: '140px', objectFit: 'cover' }}
               />

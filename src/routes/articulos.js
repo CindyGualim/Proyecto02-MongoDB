@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// ✅ Ruta para obtener todos los artículos
+//  Ruta para obtener todos los artículos
 router.get('/', async (req, res) => {
   try {
     const articulos = await Articulo.find();
