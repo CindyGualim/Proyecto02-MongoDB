@@ -77,3 +77,60 @@ body, html {
     color: var(--eggplant);
     font-weight: bold;
   }
+
+  /* === NAVBAR limpio ====================================== */
+.navbar{
+  background: var(--eggplant);
+  padding: 1rem 0;
+  position: fixed;
+  top:0; left:0; width:100%;
+  z-index: 1000;
+}
+.nav-list{
+  margin:0; padding:0;
+  list-style:none;
+  display:flex;
+  justify-content:center;
+  gap:2.5rem;
+}
+.nav-list a{
+  color:var(--white);
+  text-decoration:none;
+  font-weight:bold;
+}
+.nav-list a:hover{ color:var(--light-orange); }
+
+/* === Contenido debajo de la barra ======================= */
+.home-container{ padding-top:90px; }
+
+/* === Grid de tarjetas =================================== */
+.grid-rest{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:1.5rem;
+}
+
+/* === Tarjeta ============================================ */
+.rest-card{
+  width:240px;
+  background:var(--white);
+  border:2px solid var(--rose-quartz);
+  border-radius:12px;
+  padding:1rem;
+  cursor:pointer;
+  transition:transform .15s, box-shadow .15s;
+}
+.rest-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 6px 12px rgba(0,0,0,.1);
+}
+.rest-card h3{ margin:0 0 .3rem 0; color:var(--eggplant);}
+.rest-card .dir{ font-size:.9rem; margin:0 0 .6rem 0;}
+.ver-mas{ font-size:.85rem; color:var(--rose-quartz); }
+
+/* === Títulos ============================================ */
+.titulo-pagina{
+  color:var(--eggplant);
+  margin-bottom:1.5rem;
+}
