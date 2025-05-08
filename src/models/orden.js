@@ -9,4 +9,4 @@ const OrdenSchema = new mongoose.Schema({
   total: Number
 });
 
-module.exports = mongoose.model('Orden', OrdenSchema);
+module.exports = mongoose.model('orden', OrdenSchema);
