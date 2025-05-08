@@ -2,19 +2,149 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Home</title>
+  <title>Agregar Comida</title>
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="CSS/food.css" />
 
+  <!-- React + Babel -->
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
+
 <body>
   <div id="root"></div>
 
-<script type="text/babel" src="./JS/Food.js">
+  <!-- ---------- SCRIPT PRINCIPAL ---------- -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-</script>
+    /* ▸ Navbar muy simple (opcional) */
+    const Navbar = () => (
+      <nav className="navbar">
+        <ul>
+          <li><a href="restaurant.html">Listado de Restaurantes</a></li>
+          <li><a href="mejores.html">Mejores Rankeados</a></li>
+          <li><a href="perfil.html">Mi Perfil</a></li>
+        </ul>
+      </nav>
+    );
 
+    /* ▸ Página Food */
+    function Food() {
+      /* estado para restaurantes y formulario ---------------------- */
+      const [restaurantes, setRestaurantes] = useState([]);
+      const [restauranteId, setRestauranteId] = useState('');
+      const [nombre, setNombre]         = useState('');
+      const [descripcion, setDesc]      = useState('');
+      const [precio, setPrecio]         = useState('');
+      const [mensaje, setMensaje]       = useState('');
+      const [foodItems, setFoodItems]   = useState([]);
+
+      /* cargar restaurantes al montar ------------------------------ */
+      useEffect(() => {
+        fetch('http://localhost:5000/api/restaurantes')
+          .then(r => r.json())
+          .then(data => {
+            setRestaurantes(data);
+            if (data.length) setRestauranteId(data[0]._id);   // valor por defecto
+          })
+          .catch(() => setMensaje('No se pudieron cargar los restaurantes'));
+      }, []);
+
+      /* enviar comida ---------------------------------------------- */
+      const handleAddFood = async () => {
+        if (!restauranteId || !nombre || !descripcion || !precio) {
+          setMensaje('❗ Completa todos los campos'); return;
+        }
+
+        try {
+          const res = await fetch('http://localhost:5000/api/articulos', {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify({
+              restauranteId,
+              nombre,
+              descripcion,
+              precio: parseFloat(precio)
+            })
+          });
+
+          if (!res.ok) throw new Error();
+
+          const saved = await res.json();
+          setFoodItems([...foodItems, saved]);
+
+          /* limpiar */
+          setNombre(''); setDesc(''); setPrecio('');
+          setMensaje('✔ Comida guardada');
+          setTimeout(()=>setMensaje(''), 2500);
+        } catch {
+          setMensaje('Error al guardar');
+        }
+      };
+
+      return (
+        <div className="home-container">
+          <Navbar />
+
+          <main className="contenido-principal">
+            <h2>Agregar Comida</h2>
+
+            {/* ---------- FORMULARIO ---------- */}
+            <div style={{maxWidth:'400px', width:'100%'}}>
+              {/* selector de restaurante */}
+              <select
+                style={{width:'100%', padding:'.6rem', marginBottom:'1rem'}}
+                value={restauranteId}
+                onChange={e=>setRestauranteId(e.target.value)}
+              >
+                {restaurantes.map(r=>(
+                  <option key={r._id} value={r._id}>
+                    {r.nombre}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text" placeholder="Nombre de la comida"
+                value={nombre} onChange={e=>setNombre(e.target.value)}
+              />
+              <textarea
+                placeholder="Descripción de la comida"
+                value={descripcion} onChange={e=>setDesc(e.target.value)}
+              ></textarea>
+              <input
+                type="number" placeholder="Precio"
+                value={precio} onChange={e=>setPrecio(e.target.value)}
+              />
+
+              <button onClick={handleAddFood}>Agregar Comida</button>
+
+              {mensaje && <p style={{marginTop:'10px'}}>{mensaje}</p>}
+            </div>
+
+            {/* ---------- LISTA ---------- */}
+            <h3 style={{marginTop:'3rem'}}>Lista de Comidas</h3>
+            <div className="container marketing">
+              <div className="row">
+                {foodItems.map((f,i)=>(
+                  <div key={i} className="col-lg-2">
+                    <img src="Recursos/img02.jpg" width="140" height="140" className="img-circle" />
+                    <h4>{f.nombre}</h4>
+                    <p>{f.descripcion}</p>
+                    <strong>Q{f.precio}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<Food/>, document.getElementById('root'));
+  </script>
 </body>
 </html>

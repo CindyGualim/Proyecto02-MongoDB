@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><title>Mejores Rankeados</title>
+<link rel="stylesheet" href="CSS/style.css">
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head><body><div id="root"></div>
+
+<script type="text/babel">
+const {useEffect,useState}=React;
+
+function Mejores(){
+  const [top,setTop]=useState([]);
+  useEffect(()=>{
+    fetch('http://localhost:5000/api/restaurantes/top')   // -> backend abajo
+      .then(r=>r.json()).then(setTop).catch(console.error);
+  },[]);
+  return(
+    <div className="home-container">
+      <nav className="navbar">
+        <ul className="nav-list">
+          <li><a href="restaurant.html">Restaurantes</a></li>
+          <li><a href="mejores.html">Mejores Rankeados</a></li>
+          <li><a href="perfil.html">Mi Perfil</a></li>
+        </ul>
+      </nav>
+      <main className="contenido-principal">
+        <h2 className="titulo-pagina">TOP Restaurantes</h2>
+        <section className="grid-rest">
+          {top.map(r=>(
+            <div key={r._id} className="rest-card"
+                 onClick={()=>location.href=`menurestaurante.html?id=${r._id}`}>
+              <h3>{r.nombre}</h3>
+              <p className="dir">⭐ {r.promedio?.toFixed(1) || 5}</p>
+              <span className="ver-mas">Ver menú ➜</span>
+            </div>
+          ))}
+        </section>
+      </main>
+    </div>);
+}
+ReactDOM.render(<Mejores/>,document.getElementById('root'));
+</script>
+</body></html>

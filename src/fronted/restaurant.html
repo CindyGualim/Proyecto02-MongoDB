@@ -3,38 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <title>Restaurantes</title>
-
-  <!-- Estilos globales -->
   <link rel="stylesheet" href="CSS/style.css" />
-
-  <!-- React -->
-  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    /* -------------------- Utilidades -------------------- */
     const { useState, useEffect } = React;
 
-    /* --------------------- Navbar ----------------------- */
     const Navbar = () => (
       <nav className="navbar">
         <ul className="nav-list">
           <li><a href="restaurant.html">Restaurantes</a></li>
-          <li><a href="#">Mejores Rankeados</a></li>
-          <li><a href="#">Mi Perfil</a></li>
+          <li><a href="mejores.html">Mejores Rankeados</a></li>
+          <li><a href="perfil.html">Mi Perfil</a></li>
         </ul>
       </nav>
     );
 
-    /* ----------------- Card de restaurante -------------- */
     const RestauranteCard = ({ r }) => (
       <div
         className="rest-card"
-        onClick={() => (window.location.href = `menurestaurante.html?id=${r._id}`)}
+        onClick={() =>
+          (window.location.href = `menurestaurante.html?id=${r._id}`)
+        }
       >
         <h3>{r.nombre}</h3>
         {r.direccion && (
@@ -46,29 +41,26 @@
       </div>
     );
 
-    /* ------------------ Página principal ---------------- */
     function RestaurantPage() {
-      const [restaurantes, setRestaurantes] = useState([]);
+      const [data, setData] = useState([]);
       const [err, setErr] = useState(null);
 
       useEffect(() => {
-        fetch("http://localhost:5000/api/restaurantes")
-          .then((r) => r.json())
-          .then(setRestaurantes)
-          .catch(() => setErr("No se pudieron cargar los restaurantes"));
+        fetch('http://localhost:5000/api/restaurantes')
+          .then(r => r.json())
+          .then(setData)
+          .catch(() => setErr('No se pudieron cargar los restaurantes'));
       }, []);
 
       return (
         <div className="home-container">
           <Navbar />
-
           <main className="contenido-principal">
             <h2 className="titulo-pagina">Restaurantes Disponibles</h2>
-
             {err && <p>{err}</p>}
 
             <section className="grid-rest">
-              {restaurantes.map((r) => (
+              {data.map(r => (
                 <RestauranteCard key={r._id} r={r} />
               ))}
             </section>
@@ -77,7 +69,7 @@
       );
     }
 
-    ReactDOM.render(<RestaurantPage />, document.getElementById("root"));
+    ReactDOM.render(<RestaurantPage />, document.getElementById('root'));
   </script>
 </body>
 </html>

@@ -1,97 +1,63 @@
+/* restaurant.js – listado de restaurantes con su propio menú */
 const { useState, useEffect } = React;
 
-function Navbar() {
-  return (
-    <nav className="navbar">
-      <ul>
-        <li><a href="#">Listado de Restaurantes</a></li>
-        <li><a href="#">Mejores Rankeados</a></li>
-      </ul>
-    </nav>
-  );
-}
+/* ---------- Barra ----------------------- */
+const Navbar = () => (
+  <nav className="navbar">
+    <ul className="nav-list">
+      <li><a href="restaurant.html">Restaurantes</a></li>
+      <li><a href="mejores.html">Mejores Rankeados</a></li>
+      <li><a href="perfil.html">Mi Perfil</a></li>
+    </ul>
+  </nav>
+);
 
-function Home() {
+/* ---------- Página ---------------------- */
+function RestaurantPage() {
   const [restaurantes, setRestaurantes] = useState([]);
-  const [platos, setPlatos] = useState([]);
+  const [platos,       setPlatos]       = useState([]);
+  const [err,          setErr]          = useState(null);
 
+  /* Datos */
   useEffect(() => {
-    // Obtener restaurantes
     fetch('http://localhost:5000/api/restaurantes')
-      .then((res) => res.json())
-      .then((data) => setRestaurantes(data))
-      .catch((err) => console.error('Error al cargar los restaurantes:', err));
+      .then(r => r.json()).then(setRestaurantes)
+      .catch(()=>setErr('Error cargando restaurantes'));
 
-    // Obtener platos
     fetch('http://localhost:5000/api/articulos')
-      .then((res) => res.json())
-      .then((data) => setPlatos(data))
-      .catch((err) => console.error('Error al cargar los platos:', err));
+      .then(r => r.json()).then(setPlatos)
+      .catch(()=>setErr('Error cargando platillos'));
   }, []);
 
-  return (
+  /* Card restaurante */
+  const Card = ({r}) => (
+    <div className="rest-card" onClick={()=>{
+      window.location.href=`menurestaurante.html?id=${r._id}`;
+    }}>
+      <h3>{r.nombre}</h3>
+      <small className="dir">
+        Zona {r.direccion?.zona} – {r.direccion?.municipio}
+      </small>
+      <span className="ver-mas">Ver menú ➜</span>
+      {/* --- menú embebido cortito ---- */}
+      {platos.filter(p => String(p.restauranteId) === String(r._id))
+        .slice(0,3)           // sólo 3 para no alargar
+        .map(p=><p key={p._id} style={{fontSize:'.8rem'}}>- {p.nombre}</p>)}
+    </div>
+  );
+
+  return(
     <div className="home-container">
-      <Navbar />
+      <Navbar/>
       <main className="contenido-principal">
-        <h2>Bienvenido a FoodApp</h2>
-        <p>Explora los mejores lugares para comer y descubre nuevas opciones.</p>
-        <img src="Recursos/img01.jpg" width="100%" height="300" />
-
-        <h2>Restaurantes y su menú</h2>
-
-        {restaurantes.map((restaurante, i) => {
-          const platosDelRestaurante = platos.filter(
-            (plato) => plato.restauranteId === restaurante.nombre
-          );
-
-          return (
-            <div key={i} style={{ marginBottom: '50px' }}>
-              <h3>{restaurante.nombre}</h3>
-              <p>
-                {restaurante.direccion?.calle}, Zona {restaurante.direccion?.zona} -{' '}
-                {restaurante.direccion?.municipio}, {restaurante.direccion?.departamento}
-              </p>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '20px',
-                  marginTop: '20px',
-                  justifyContent: 'center',
-                }}
-              >
-                {platosDelRestaurante.map((plato, j) => (
-                  <div
-                    key={j}
-                    style={{
-                      width: '250px',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                      overflow: 'hidden',
-                      backgroundColor: 'white',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <img
-                      src="Recursos/img02.jpg"
-                      alt={plato.nombre}
-                      style={{ width: '100%', height: '140px', objectFit: 'cover' }}
-                    />
-                    <div style={{ padding: '15px' }}>
-                      <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>{plato.nombre}</h3>
-                      <p style={{ fontSize: '14px', color: '#555' }}>{plato.descripcion}</p>
-                      <p style={{ fontWeight: 'bold', color: '#333' }}>Q{plato.precio}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+        <h2 className="titulo-pagina">Restaurantes Disponibles</h2>
+        {err && <p>{err}</p>}
+        <section className="grid-rest">
+          {restaurantes.map(r => <Card key={r._id} r={r}/>)}
+        </section>
       </main>
     </div>
   );
 }
 
-ReactDOM.render(<Home />, document.getElementById('root'));
+ReactDOM.render(<RestaurantPage/>, document.getElementById('root'));

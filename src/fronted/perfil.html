@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><title>Perfil</title>
+<link rel="stylesheet" href="CSS/style.css">
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head><body><div id="root"></div>
+
+<script type="text/babel">
+const {useEffect,useState}=React;
+const token=localStorage.getItem('token')||'';
+
+function Perfil(){
+  const [user,setUser]=useState(null);
+  const [msg,setMsg]=useState('');
+  useEffect(()=>{
+    fetch('http://localhost:5000/api/usuarios/me',
+      {headers:{Authorization:token}})
+      .then(r=>r.ok?r.json():Promise.reject())
+      .then(setUser)
+      .catch(()=>setMsg('No se pudo cargar tu perfil'));
+  },[]);
+  return(
+    <div className="home-container">
+      <nav className="navbar">
+        <ul className="nav-list">
+          <li><a href="restaurant.html">Restaurantes</a></li>
+          <li><a href="mejores.html">Mejores Rankeados</a></li>
+          <li><a href="perfil.html">Mi Perfil</a></li>
+        </ul>
+      </nav>
+      <main className="contenido-principal">
+        <h2 className="titulo-pagina">Mi Perfil</h2>
+        {user
+          ? <p><strong>{user.nombre}</strong><br/>{user.correo}</p>
+          : <p>{msg}</p>}
+      </main>
+    </div>);
+}
+ReactDOM.render(<Perfil/>,document.getElementById('root'));
+</script>
+</body></html>

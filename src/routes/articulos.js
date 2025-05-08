@@ -1,25 +1,37 @@
-const express = require('express');
-const router = express.Router();
-const Articulo = require('../models/articulo.js');
+/* routes/articulos.js */
+const express  = require('express');
+const router   = express.Router();
+const Articulo = require('../models/Articulo');
 
-// Ruta para agregar un artículo
+/* ─────────────── Crear un platillo ─────────────── */
 router.post('/', async (req, res) => {
   try {
-    const nuevoArticulo = new Articulo(req.body);
-    await nuevoArticulo.save();
-    res.status(201).json(nuevoArticulo);
+    const nuevo = new Articulo(req.body);
+    await nuevo.save();
+    res.status(201).json(nuevo);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-//  Ruta para obtener todos los artículos
-router.get('/', async (req, res) => {
+/* ─────────────── Todos los platillos ───────────── */
+router.get('/', async (_req, res) => {
   try {
     const articulos = await Articulo.find();
     res.json(articulos);
   } catch (err) {
     res.status(500).json({ error: 'Error al obtener artículos' });
+  }
+});
+
+/* ─────────────── Platillos de UN restaurante ───── */
+router.get('/restaurante/:id', async (req, res) => {
+  try {
+    const { id } = req.params;                      // ← id del restaurante
+    const articulos = await Articulo.find({ restauranteId: id });
+    res.json(articulos);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener menú' });
   }
 });
 

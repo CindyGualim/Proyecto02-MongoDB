@@ -1,60 +1,77 @@
+/*  Home.jsx – muestra platos con el nombre del restaurante  */
 const { useState, useEffect } = React;
 
-function Navbar() {
-  return (
-    <nav className="navbar">
-      <ul>
-        <li><a href="restaurant.html">Listado de Restaurantes</a></li>
-        <li><a href="#">Mejores Rankeados</a></li>
-      </ul>
-    </nav>
-  );
-}
+/* ---------- Navbar reutilizable ------------------------ */
+const Navbar = () => (
+  <nav className="navbar">
+    <ul className="nav-list">
+      <li><a href="restaurant.html">Restaurantes</a></li>
+      <li><a href="mejores.html">Mejores Rankeados</a></li>
+      <li><a href="perfil.html">Mi Perfil</a></li>
+    </ul>
+  </nav>
+);
 
+/* -------------------- Página --------------------------- */
 function Home() {
-  const [foodItems, setFoodItems] = useState([]);
+  const [platos,       setPlatos]       = useState([]);
+  const [restaurantes, setRestaurantes] = useState([]);
+  const [err,          setErr]          = useState(null);
 
+  /* 1. Traer restaurantes y platos ---------------------- */
   useEffect(() => {
-    // Obtener platos desde el backend
+    /* restaurantes */
+    fetch('http://localhost:5000/api/restaurantes')
+      .then(r => r.json())
+      .then(setRestaurantes)
+      .catch(() => setErr('No se pudieron cargar los restaurantes'));
+
+    /* platos / artículos de menú */
     fetch('http://localhost:5000/api/articulos')
-      .then((res) => res.json())
-      .then((data) => setFoodItems(data))
-      .catch((err) => console.error('Error al cargar los platos:', err));
+      .then(r => r.json())
+      .then(setPlatos)
+      .catch(() => setErr('No se pudieron cargar los platillos'));
   }, []);
+
+  /* 2. Diccionario id → nombre para lookup rápido -------- */
+  const mapaRest = Object.fromEntries(
+    restaurantes.map(r => [String(r._id), r.nombre])
+  );
 
   return (
     <div className="home-container">
-      <Navbar />
+      <Navbar/>
+
       <main className="contenido-principal">
         <h2>Bienvenido a FoodApp</h2>
         <p>Explora los mejores lugares para comer y descubre nuevas opciones.</p>
         <img src="Recursos/img01.jpg" width="100%" height="300" />
-        <h2>Menu </h2>
+
+        <h2>Menú</h2>
         <p>Listado de comidas</p>
-        {/* Cards de comidas */}
-        <section style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '30px', justifyContent: 'center' }}>
-          {foodItems.map((food, index) => (
-            <div
-              key={index}
-              style={{
-                width: '250px',
-                borderRadius: '8px',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                overflow: 'hidden',
-                backgroundColor: 'white',
-                textAlign: 'center'
-              }}
-            >
+
+        {err && <p>{err}</p>}
+
+        {/* GRID de tarjetas */}
+        <section style={{
+          display:'flex', flexWrap:'wrap', gap:'20px',
+          marginTop:'30px', justifyContent:'center'
+        }}>
+          {platos.map((plato) => (
+            <div key={plato._id} className="rest-card" style={{width:'250px'}}>
               <img
                 src="Recursos/img02.jpg"
-                alt={food.nombre}
-                style={{ width: '100%', height: '140px', objectFit: 'cover' }}
+                alt={plato.nombre}
+                style={{ width:'100%', height:'140px', objectFit:'cover' }}
               />
-              <div style={{ padding: '15px' }}>
-                <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>{food.nombre}</h3>
-                <p style={{ fontSize: '14px', color: '#555' }}>{food.descripcion}</p>
-                <p style={{ fontWeight: 'bold', color: '#333' }}>Q{food.precio}</p>
-                <p style={{ fontSize: '12px', color: '#888' }}>Restaurante ID: {food.restauranteId}</p>
+              <div style={{padding:'15px'}}>
+                <h3 style={{margin:'0 0 .5rem 0'}}>{plato.nombre}</h3>
+                <small style={{color:'#888'}}>
+                  {/* 👇 nombre del restaurante */}
+                  {mapaRest[plato.restauranteId] || 'Restaurante desconocido'}
+                </small>
+                <p style={{fontSize:'14px',margin:'.4rem 0'}}>{plato.descripcion}</p>
+                <strong>Q{plato.precio}</strong>
               </div>
             </div>
           ))}
@@ -64,4 +81,4 @@ function Home() {
   );
 }
 
-ReactDOM.render(<Home />, document.getElementById('root'));
+ReactDOM.render(<Home/>, document.getElementById('root'));

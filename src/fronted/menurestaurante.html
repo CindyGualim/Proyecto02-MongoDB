@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Menú del Restaurante</title>
+  <link rel="stylesheet" href="CSS/style.css">
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- MenuRestaurante.jsx -->
+<script type="text/babel">
+const { useEffect, useState } = React;
+
+/* ─── util ─── */
+const REST   = new URLSearchParams(location.search).get('id');
+const TOKEN  = localStorage.getItem('jwt') || '';
+
+/* ─── helpers carrito en localStorage ─── */
+const LS_KEY = `cart_${REST}`;
+const loadCart   = () => JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+const saveCart   = (c) => localStorage.setItem(LS_KEY, JSON.stringify(c));
+
+function Menu() {
+  const [menu , setMenu ] = useState([]);
+  const [cart , setCart ] = useState(loadCart());
+  const [msg  , setMsg  ] = useState('');
+
+  /* cargar menú */
+  useEffect(()=>{
+    fetch(`http://localhost:5000/api/articulos/restaurante/${REST}`)
+      .then(r=>r.json())
+      .then(setMenu)
+      .catch(()=>setMsg('Error al cargar el menú'));
+  },[]);
+
+  /* cada cambio se persiste */
+  useEffect(()=> saveCart(cart) , [cart]);
+
+  const addItem = (p) =>{
+    setCart(prev=>{
+      const i = prev.findIndex(x=>x.articuloId===p._id);
+      if(i>=0){ prev[i].cantidad++; return [...prev]; }
+      return [...prev,{ articuloId:p._id, nombre:p.nombre, precio:p.precio, cantidad:1 }];
+    });
+  };
+
+  const changeQty = (id, delta) =>{
+    setCart(prev=>{
+      const next = prev.map(it=> it.articuloId===id ? {...it, cantidad:it.cantidad+delta} : it)
+                       .filter(it=>it.cantidad>0);
+      return next;
+    });
+  };
+
+  const total = cart.reduce((s,i)=>s+i.precio*i.cantidad,0);
+
+  const confirmar = ()=>{
+    if(!TOKEN) return alert('Debes iniciar sesión');
+    fetch('http://localhost:5000/api/ordenes',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${TOKEN}`
+      },
+      body:JSON.stringify({ restauranteId:REST, platillos: cart })
+    })
+    .then(r=>r.ok? r.json():Promise.reject())
+    .then(()=>{
+      setCart([]); saveCart([]);
+      alert('¡Orden creada con éxito!');
+    })
+    .catch(()=>alert('Error al crear la orden'));
+  };
+
+  /* ───── render ───── */
+  return(
+    <div className="home-container">
+      <nav className="navbar">
+        <ul className="nav-list">
+          <li><a href="restaurant.html">Restaurantes</a></li>
+          <li><a href="mejores.html">Mejores Rankeados</a></li>
+          <li><a href="perfil.html">Mi Perfil</a></li>
+        </ul>
+      </nav>
+
+      <main className="contenido-principal">
+        <h2 className="titulo-pagina">Menú</h2>
+
+        {msg && <p>{msg}</p>}
+
+        <section className="grid-rest">
+          {menu.map(p=>(
+            <div key={p._id} className="rest-card" style={{width:250}}>
+              <h3>{p.nombre}</h3>
+              <p style={{fontSize:14}}>{p.descripcion}</p>
+              <strong>Q{p.precio}</strong>
+              <button onClick={()=>addItem(p)} style={{marginTop:6}}>Agregar</button>
+            </div>
+          ))}
+        </section>
+
+        {/* carrito */}
+        <h3 style={{marginTop:40}}>Carrito (Q{total})</h3>
+        {cart.length===0 && <p>Vacío</p>}
+        {cart.map(it=>(
+          <p key={it.articuloId}>
+            {it.nombre} – Q{it.precio*it.cantidad}
+            <button onClick={()=>changeQty(it.articuloId,-1)}>-</button>
+            <span>{it.cantidad}</span>
+            <button onClick={()=>changeQty(it.articuloId,1)}>+</button>
+          </p>
+        ))}
+
+        {cart.length>0 && <button onClick={confirmar}>Confirmar pedido</button>}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.render(<Menu/>, document.getElementById('root'));
+</script>
+</body>
+</html>
