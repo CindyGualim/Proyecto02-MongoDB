@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Menú del Restaurante</title>
+  <link rel="stylesheet" href="CSS/style.css">
+
+  <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- MenuRestaurante.jsx -->
+  <script type="text/babel">
+    const { useEffect, useState } = React;
+
+    function getId() {
+      return new URLSearchParams(window.location.search).get('id');
+    }
+
+    function MenuRestaurante() {
+      const restauranteId = getId();
+      const [menu, setMenu] = useState([]);
+      const [carrito, setCarrito] = useState([]);
+      const [pedidoExitoso, setPedidoExitoso] = useState(false);
+      const [calificacion, setCalificacion] = useState(5);
+      const [comentario, setComentario] = useState('');
+      const [mensaje, setMensaje] = useState('');
+
+      /* Cargar menú */
+      useEffect(() => {
+        fetch(`http://localhost:5000/api/menus/${restauranteId}`)
+          .then(r => r.json())
+          .then(setMenu)
+          .catch(console.error);
+      }, [restauranteId]);
+
+      const agregar = (plato) => setCarrito([...carrito, plato]);
+
+      const total = carrito.reduce((sum,p)=>sum+p.precio,0);
+
+      /* Enviar pedido */
+      const hacerPedido = () =>{
+        fetch('http://localhost:5000/api/ordenes', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ restaurante: restauranteId, items: carrito })
+        })
+        .then(r=>r.json())
+        .then(()=>{
+          setPedidoExitoso(true);
+          setCarrito([]);
+        })
+        .catch(()=>setMensaje('Error al crear pedido'));
+      };
+
+      /* Enviar reseña */
+      const enviarResena = ()=>{
+        fetch('http://localhost:5000/api/resenas',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ restaurante: restauranteId, comentario, calificacion })
+        })
+        .then(()=>setMensaje('¡Gracias por tu reseña!'))
+        .catch(()=>setMensaje('Error al guardar reseña'));
+      };
+
+      return(
+        <div className="home-container">
+          <h2>Menú</h2>
+
+          <ul style={{listStyle:'none',padding:0}}>
+            {menu.map(p=>(
+              <li key={p._id} className="rest-card">
+                <h4>{p.nombre} – Q{p.precio}</h4>
+                <p>{p.descripcion}</p>
+                <button onClick={()=>agregar(p)}>Agregar</button>
+              </li>
+            ))}
+          </ul>
+
+          <h3>Carrito (Q{total})</h3>
+          {carrito.map((c,i)=>(
+            <p key={i}>{c.nombre} – Q{c.precio}</p>
+          ))}
+          {carrito.length>0 && <button onClick={hacerPedido}>Confirmar Pedido</button>}
+
+          {pedidoExitoso && (
+            <div style={{marginTop:'1.5rem'}}>
+              <h3>Califica tu experiencia</h3>
+              <select value={calificacion} onChange={e=>setCalificacion(e.target.value)}>
+                {[1,2,3,4,5].map(n=><option key={n} value={n}>{n}</option>)}
+              </select>
+              <textarea
+                placeholder="Comentario"
+                value={comentario}
+                onChange={e=>setComentario(e.target.value)}
+              ></textarea>
+              <button onClick={enviarResena}>Enviar Reseña</button>
+            </div>
+          )}
+
+          {mensaje && <p>{mensaje}</p>}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<MenuRestaurante/>, document.getElementById('root'));
+  </script>
+</body>
+</html>
