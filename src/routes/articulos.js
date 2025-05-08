@@ -23,4 +23,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+    const articulos = await Articulo.find().populate('restauranteId', 'nombre');
+    
+    // Para que en el frontend sea fácil comparar:
+    const articulosConNombre = articulos.map((articulo) => ({
+      _id: articulo._id,
+      nombre: articulo.nombre,
+      descripcion: articulo.descripcion,
+      precio: articulo.precio,
+      restauranteId: articulo.restauranteId._id.toString(),
+      restauranteNombre: articulo.restauranteId.nombre
+    }));
+
+    res.json(articulosConNombre);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
