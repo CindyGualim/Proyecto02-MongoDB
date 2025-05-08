@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const rutasUsuario = require('./routes/index');
-const rutasRestaurante = require('./routes/restaurant.routes');
+const rutasRestaurante = require('./routes/restaurantes');
 
 const app = express();
 
