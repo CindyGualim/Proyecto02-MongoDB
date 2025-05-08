@@ -13,20 +13,12 @@ function Navbar() {
 
 function Home() {
   const [restaurantes, setRestaurantes] = useState([]);
-  const [platos, setPlatos] = useState([]);
 
   useEffect(() => {
-    // Obtener restaurantes
-    fetch('http://localhost:5000/api/restaurantes')
+    fetch('http://localhost:5000/api/restaurantes') // NOTA: usa /api/restaurantes (sin /con-platos)
       .then((res) => res.json())
       .then((data) => setRestaurantes(data))
       .catch((err) => console.error('Error al cargar los restaurantes:', err));
-
-    // Obtener platos
-    fetch('http://localhost:5000/api/articulos')
-      .then((res) => res.json())
-      .then((data) => setPlatos(data))
-      .catch((err) => console.error('Error al cargar los platos:', err));
   }, []);
 
   return (
@@ -37,58 +29,24 @@ function Home() {
         <p>Explora los mejores lugares para comer y descubre nuevas opciones.</p>
         <img src="Recursos/img01.jpg" width="100%" height="300" />
 
-        <h2>Restaurantes y su menú</h2>
+        <h2>Restaurantes</h2>
 
-        {restaurantes.map((restaurante, i) => {
-          const platosDelRestaurante = platos.filter(
-            (plato) => plato.restauranteId === restaurante.nombre
-          );
-
-          return (
-            <div key={i} style={{ marginBottom: '50px' }}>
+        {restaurantes.map((restaurante, i) => (
+            <div key={i} style={{ marginBottom: '30px' }}>
               <h3>{restaurante.nombre}</h3>
-              <p>
-                {restaurante.direccion?.calle}, Zona {restaurante.direccion?.zona} -{' '}
-                {restaurante.direccion?.municipio}, {restaurante.direccion?.departamento}
-              </p>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '20px',
-                  marginTop: '20px',
-                  justifyContent: 'center',
-                }}
-              >
-                {platosDelRestaurante.map((plato, j) => (
-                  <div
-                    key={j}
-                    style={{
-                      width: '250px',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                      overflow: 'hidden',
-                      backgroundColor: 'white',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <img
-                      src="Recursos/img02.jpg"
-                      alt={plato.nombre}
-                      style={{ width: '100%', height: '140px', objectFit: 'cover' }}
-                    />
-                    <div style={{ padding: '15px' }}>
-                      <h3 style={{ fontSize: '18px', marginBottom: '10px' }}>{plato.nombre}</h3>
-                      <p style={{ fontSize: '14px', color: '#555' }}>{plato.descripcion}</p>
-                      <p style={{ fontWeight: 'bold', color: '#333' }}>Q{plato.precio}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {restaurante.direccion && restaurante.direccion.calle ? (
+                <p>
+                  {restaurante.direccion.calle}, Zona {restaurante.direccion.zona} -{' '}
+                  {restaurante.direccion.municipio}, {restaurante.direccion.departamento}
+                </p>
+              ) : (
+                <p>Dirección no disponible</p>
+              )}
+              <p>Teléfono: {restaurante.telefono || 'No disponible'}</p>
             </div>
-          );
-        })}
+          ))}
+
+
       </main>
     </div>
   );
